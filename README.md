@@ -95,13 +95,20 @@ ExecStart=-/sbin/agetty --autologin r36s --noclear %I $TERM
 
 # Run love2d in r36s
 
+- sudo apt install git -y
 - mkdir -p ~/projects
 - cd ~/projects
+- git clone https://github.com/RobertoFreireDev/R36s-Love2d-GameEngine-Lua
+- sudo apt install love -y
+- love --version
+- cd R36s-Love2d-GameEngine-Lua/src/
+- Use framebuffer + GLES on supported hardware
+- sudo apt install mesa-utils libgles2-mesa-dev libegl1-mesa-dev -y
+- love . (to run)
 
 # TO DO
 
 - use sound clone, stop, play and volume to fix abrupt sound when playing multiple times sfx function
-- Add joystick in buttons as well
 - Save/Load Music patterns in txt file
 - Implement UI for Sprite/Map Editor
 - Implement UI for Sfx/Music Editor
