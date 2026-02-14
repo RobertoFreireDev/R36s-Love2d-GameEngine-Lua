@@ -108,6 +108,7 @@ ExecStart=-/sbin/agetty --autologin r36s --noclear %I $TERM
 
 # TO DO
 
+- Create local multiplayer simples games using lua enet https://love2d.org/wiki/lua-enet
 - use sound clone, stop, play and volume to fix abrupt sound when playing multiple times sfx function
 - Save/Load Music patterns in txt file
 - Implement UI for Sprite/Map Editor
