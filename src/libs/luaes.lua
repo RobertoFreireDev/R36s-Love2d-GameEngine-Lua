@@ -326,25 +326,67 @@ end
 
 local lastPlayedTime = {}
 local MIN_DELAY = 1/32
+local FADE_TIME = 0.05
+local active_sounds = {} 
 
 function sfx(index, d)
     d = (d ~= nil and type(d) == "number") and d or 3
-    delay = mid(1,d,16)
+    local delay = mid(1, d, 16)
     local currentTime = os.clock()
-    if lastPlayedTime[index] and (currentTime - lastPlayedTime[index] < MIN_DELAY*delay) then
+
+    if lastPlayedTime[index] and (currentTime - lastPlayedTime[index] < MIN_DELAY * delay) then
         return
     end
     lastPlayedTime[index] = currentTime
-    
-    if SOUNDS[index]:isPlaying() then
-        SOUNDS[index]:stop()
-        SOUNDS[index]:play()
-    else
-        SOUNDS[index]:play()
+
+    for i = #active_sounds, 1, -1 do
+        local snd = active_sounds[i]
+        if snd.index == index and snd.state ~= "fade_out" then
+            snd.state = "fade_out"
+        end
     end
+
+    local newSource = SOUNDS[index]:clone()
+    newSource:setVolume(0)
+    newSource:play()
+    
+    table.insert(active_sounds, {
+        index = index,
+        source = newSource,
+        state = "fade_in",
+        volume = 0,
+        target_volume = 1.0
+    })
 end
 
 function updatesfx(dt)
+    for i = #active_sounds, 1, -1 do
+        local snd = active_sounds[i]
+        
+        if snd.state == "fade_in" then
+            snd.volume = snd.volume + (dt / FADE_TIME)
+            if snd.volume >= snd.target_volume then
+                snd.volume = snd.target_volume
+                snd.state = "playing"
+            end
+            snd.source:setVolume(snd.volume)
+            
+        elseif snd.state == "fade_out" then
+            snd.volume = snd.volume - (dt / FADE_TIME)
+            if snd.volume <= 0 then
+                snd.volume = 0
+                snd.source:stop()
+                table.remove(active_sounds, i)
+            else
+                snd.source:setVolume(snd.volume)
+            end
+            
+        elseif snd.state == "playing" then
+            if not snd.source:isPlaying() then
+                table.remove(active_sounds, i)
+            end
+        end
+    end
 end
 
 function ssfx(index, t, v, w, e, l)
@@ -365,6 +407,8 @@ function ssfx(index, t, v, w, e, l)
     end
     SOUNDS[soundIndex] = audio.genMusic(newsound)
 end
+
+--#region music
 
 local cmp = nil
 local cmpIndex = 1
