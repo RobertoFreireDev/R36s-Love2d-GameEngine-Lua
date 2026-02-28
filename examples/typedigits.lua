@@ -16,7 +16,6 @@ local function ipString()
 end
 
 function _init()
-    font(2)
 end
 
 function _update(dt)
