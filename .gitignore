@@ -1,5 +1,6 @@
 # data
 *.txt
+*.love
 
 # Compiled Lua sources
 luac.out
