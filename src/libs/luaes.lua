@@ -5,6 +5,8 @@ local spritesheetsdata = require("data/spritesheet")
 local mapsdata = require("data/map")
 local flagdata = require("data/flag")
 local emptycartdata = require("data/emptycartdata")
+local hasEnet, enet = pcall(require, "enet")
+local socket = require("socket")
 
 --#region global variables
 local VIRTUAL_WIDTH = 160
@@ -1051,6 +1053,12 @@ function stat(n)
         return { x = VIRTUAL_WIDTH,  y = VIRTUAL_HEIGHT}
     elseif n == 10 then
         return { x = window_width,  y = window_height, scale = scale, ofx = offsetX,  ofy = offsetY }
+    elseif n == 11 then -- IP Local (example: 192.168.100.186)
+        local s = socket.udp()
+        s:setpeername("8.8.8.8", 80)
+        local ip, _ = s:getsockname()
+        s:close()
+        return ip or "127.0.0.1"
     else
         return nil
     end
@@ -1234,6 +1242,60 @@ function sdata(index, value)
 end
 --#endregion
 
+--#region networking
+local netHost = nil
+local netServerPeer = nil
+local netAddress = nil
+
+_netevent = function(_) end
+
+function createserver(ip)
+    if not hasEnet then
+        return false, "enet module not found"
+    end
+
+    ip = (type(ip) == "string" and ip ~= "") and ip or "0.0.0.0:6789"
+    netAddress = ip
+    netServerPeer = nil
+    netHost = enet.host_create(ip)
+
+    if not netHost then
+        return false, "failed to start server on " .. ip
+    end
+
+    return true
+end
+
+function connecttoserver(ip)
+    if not hasEnet then
+        return false, "enet module not found"
+    end
+
+    ip = (type(ip) == "string" and ip ~= "") and ip or netAddress or "127.0.0.1:6789"
+    netAddress = ip
+    netHost = enet.host_create()
+
+    if not netHost then
+        return false, "failed to create client host"
+    end
+
+    netServerPeer = netHost:connect(ip)
+    return netServerPeer ~= nil, netServerPeer and nil or ("failed to connect to " .. ip)
+end
+
+local function updatenetwork()
+    if not netHost then return end
+
+    local event = netHost:service(0)
+    while event do
+        if type(_netevent) == "function" then
+            _netevent(event)
+        end
+        event = netHost:service()
+    end
+end
+--#endregion
+
 --#region main
 _init = function() end
 _update = function(dt) end
@@ -1272,6 +1334,7 @@ end
 function love.update(dt)
     rerenderImage = { false, false, false, false, false, false, false, false }
     _update(dt)
+    updatenetwork()
     updatesfx(dt)
     updatemusic()
     updatespritesheetimages()
@@ -1424,6 +1487,10 @@ return {
     btn = btn,
     btnp = btnp,
     mouse = mouse,
+    -- networking --
+    createserver = createserver,
+    connecttoserver = connecttoserver,
+    _netevent = _netevent,
     -- loop --
     _init = _init,
     _update = _update,
