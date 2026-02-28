@@ -7,7 +7,7 @@ Game engine like Pico 8 but using Love2d to be able to play at hardware that sup
 ](https://github.com/R36S-Stuff/R36S-Armbian/releases/tag/RC5)
 - Install image on microsd 
 
-![alt text](rufus.png)
+![alt text](img/rufus.png)
 
 - update firstrun_overrides.txt file on micro sd with your WiFi and password
 - firstrun_overrides.txt:
@@ -27,12 +27,12 @@ wifipass=asuhdude
 - first login: user/password: r36s/r36s
 - it should automatically connect to your wifi. if not, redo whole process
 
-![first login](firstlogin.png)
+![first login](img/firstlogin.png)
 
 - On your PC, run ssh r36s@192.168.100.237
 - password: r36s
 
-![ssh access](sshaccess.png)
+![ssh access](img/sshaccess.png)
 
 # Increase size for mmcblk1p2
 
@@ -69,14 +69,14 @@ Device         Boot  Start     End Sectors  Size Id Type
 
 - sudo fdisk /dev/mmcblk1
 
-![disk commands](diskcommands.png)
+![disk commands](img/diskcommands.png)
 
 - sudo partprobe /dev/mmcblk1
 - sudo resize2fs /dev/mmcblk1p2
 - lsblk
 - df -h
 
-![Resize the filesystem and test](diskcommands2.png)
+![Resize the filesystem and test](img/diskcommands2.png)
 
 # install an update
 
