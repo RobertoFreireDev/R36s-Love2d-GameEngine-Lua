@@ -1,5 +1,5 @@
 # LuaES
-Game engine like Pico 8 but using Love2d to be able to play at hardware that supports opengl es
+Love2d project to be able to play at hardware that supports opengl es
 
 # Run on Linux armbian on R36s handheld game console
 
